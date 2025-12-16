@@ -1,0 +1,11 @@
+.vercel
+.env
+*.csv
+__pycache__/
+*.pyc
+makerslounge-web/
+.vercel/
+*.mp4
+matches.json
+coverage.json
+validation.json

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakersLounge Toronto #6 - Community Stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #FAF9F6;
+            min-height: 100vh;
+            color: #1a1a2e;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Subtle dot pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle, #e8e6e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        /* Hero image section */
+        .hero-banner {
+            width: 100%;
+            height: 380px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 40px;
+            position: relative;
+            border: 2px solid #1a1a2e;
+            box-shadow: 6px 6px 0px rgba(26, 26, 46, 0.15), 0 4px 20px rgba(0,0,0,0.04);
+        }
+
+        .hero-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 65%;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to top, rgba(26, 26, 46, 0.6), transparent);
+            pointer-events: none;
+        }
+
+        .hero-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 25px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .header h1 span.makers {
+            background: linear-gradient(135deg, #4169E1 0%, #6B8DD6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header h1 span.lounge {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.4rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .header .date {
+            display: inline-block;
+            font-size: 1rem;
+            color: #fff;
+            background: linear-gradient(135deg, #4169E1, #5a7fd6);
+            padding: 8px 20px;
+            border-radius: 30px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .big-number {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 30px 50px;
+            background: #fff;
+            border-radius: 20px;
+            border: 2px solid #1a1a2e;
+            box-shadow: 6px 6px 0px rgba(26, 26, 46, 0.15), 0 4px 20px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px rgba(26, 26, 46, 0.2), 0 6px 25px rgba(0,0,0,0.06);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #4169E1, #FF8C00, #FFD700);
+        }
+
+        .stat-card .number {
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: #4169E1;
+        }
+
+        .stat-card:nth-child(2) .number {
+            color: #FF8C00;
+        }
+
+        .stat-card:nth-child(3) .number {
+            color: #32CD32;
+        }
+
+        .stat-card .label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #1a1a2e;
+            box-shadow: 5px 5px 0px rgba(26, 26, 46, 0.12), 0 4px 20px rgba(0,0,0,0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 6px 6px 0px rgba(26, 26, 46, 0.15), 0 6px 25px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card h2 .icon {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #4169E1, #FF8C00);
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .skills-comparison {
+            grid-column: span 2;
+        }
+
+        .skills-comparison .chart-container {
+            height: 350px;
+        }
+
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .phase-item {
+            text-align: center;
+            padding: 20px 15px;
+            border-radius: 15px;
+            background: #fff;
+            border: 2px solid #1a1a2e;
+            box-shadow: 4px 4px 0px rgba(26, 26, 46, 0.1), 0 3px 15px rgba(0,0,0,0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .phase-item:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0px rgba(26, 26, 46, 0.15), 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .phase-item .emoji {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .phase-item .count {
+            font-size: 2.8rem;
+            font-weight: 700;
+        }
+
+        .phase-item .percent {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .phase-item .name {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spark .count, .spark .percent { color: #FFD700; }
+        .build .count, .build .percent { color: #32CD32; }
+        .momentum .count, .momentum .percent { color: #4169E1; }
+        .maintenance .count, .maintenance .percent { color: #FF6B6B; }
+
+        .spark { border-bottom: 5px solid #FFD700; }
+        .build { border-bottom: 5px solid #32CD32; }
+        .momentum { border-bottom: 5px solid #4169E1; }
+        .maintenance { border-bottom: 5px solid #FF6B6B; }
+
+        .superpowers-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .superpower-tag {
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: #f0f4ff;
+            border: 2px solid #4169E1;
+            color: #4169E1;
+            transition: all 0.2s;
+        }
+
+        .superpower-tag:hover {
+            background: #4169E1;
+            color: #fff;
+        }
+
+        .superpower-tag.highlight {
+            background: linear-gradient(135deg, #FF8C00, #FFB347);
+            border-color: #FF8C00;
+            color: #fff;
+        }
+
+        .superpower-tag.highlight:hover {
+            background: linear-gradient(135deg, #e07b00, #FF8C00);
+        }
+
+        .superpower-tag.teal {
+            background: linear-gradient(135deg, #2DD4BF, #5EEAD4);
+            border-color: #2DD4BF;
+            color: #1a1a2e;
+        }
+
+        .superpower-tag.teal:hover {
+            background: linear-gradient(135deg, #14B8A6, #2DD4BF);
+        }
+
+        .projects-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .project-item {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #fff5e6 100%);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #333;
+            border-left: 4px solid;
+            border-image: linear-gradient(180deg, #4169E1, #FF8C00) 1;
+            font-weight: 500;
+        }
+
+        .hot-skill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: #fff5f5;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #FF6B6B;
+        }
+
+        .hot-skill .name {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .hot-skill .gap {
+            color: #FF6B6B;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 40px;
+            background: linear-gradient(135deg, #2DD4BF 0%, #4169E1 40%, #FF8C00 100%);
+            border-radius: 20px;
+            border: 2px solid #1a1a2e;
+            box-shadow: 6px 6px 0px rgba(26, 26, 46, 0.15), 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        .footer .cta {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .footer .details {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        .footer .hashtags {
+            margin-top: 15px;
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .keyword-pills {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .keyword-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: #fff;
+            border: 2px solid #1a1a2e;
+            border-radius: 35px;
+            box-shadow: 3px 3px 0px rgba(26, 26, 46, 0.1), 0 3px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s;
+        }
+
+        .keyword-pill:hover {
+            transform: translateY(-2px);
+        }
+
+        .keyword-pill .count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4169E1;
+        }
+
+        .keyword-pill:nth-child(2) .count { color: #FF8C00; }
+        .keyword-pill:nth-child(3) .count { color: #32CD32; }
+        .keyword-pill:nth-child(4) .count { color: #9B59B6; }
+
+        .keyword-pill .label {
+            color: #555;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Decorative elements */
+        .deco-rocket {
+            position: absolute;
+            top: 20px;
+            right: 50px;
+            font-size: 3rem;
+            transform: rotate(45deg);
+        }
+
+        .deco-bulb {
+            position: absolute;
+            top: 30px;
+            left: 50px;
+            font-size: 2.5rem;
+        }
+
+        /* Colored blob decorations */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.1;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .blob-teal {
+            width: 400px;
+            height: 400px;
+            background: #2DD4BF;
+            top: 10%;
+            left: -100px;
+        }
+
+        .blob-yellow {
+            width: 350px;
+            height: 350px;
+            background: #FBBF24;
+            top: 40%;
+            right: -80px;
+        }
+
+        .blob-blue {
+            width: 300px;
+            height: 300px;
+            background: #4169E1;
+            bottom: 10%;
+            left: 20%;
+        }
+
+        /* Handshake hero accent */
+        .match-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #2DD4BF 0%, #4169E1 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 15px;
+            border: 2px solid #1a1a2e;
+            box-shadow: 3px 3px 0px rgba(26,26,46,0.15);
+        }
+
+        /* Decorative icons for sections */
+        .section-deco {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.15;
+            bottom: 10px;
+            right: 15px;
+        }
+
+        /* Building blocks accent */
+        .blocks-accent {
+            display: flex;
+            gap: 4px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .block {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #1a1a2e;
+        }
+
+        .block:nth-child(1) { background: #FBBF24; }
+        .block:nth-child(2) { background: #4169E1; }
+        .block:nth-child(3) { background: #2DD4BF; }
+        .block:nth-child(4) { background: #FF8C00; }
+        .block:nth-child(5) { background: #32CD32; }
+
+        /* Hand-drawn wave decoration */
+        .wave-decoration {
+            width: 100%;
+            height: 60px;
+            margin-top: 30px;
+            opacity: 0.6;
+        }
+
+        .wave-decoration svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ========== RESPONSIVE MOBILE STYLES ========== */
+        @media (max-width: 900px) {
+            body {
+                padding: 20px;
+            }
+
+            .hero-banner {
+                height: 250px;
+                margin-bottom: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .big-number {
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .stat-card {
+                width: 100%;
+                max-width: 300px;
+                padding: 25px 30px;
+            }
+
+            .stat-card .number {
+                font-size: 3.5rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .skills-comparison {
+                grid-column: span 1;
+            }
+
+            .phase-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .phase-item .count {
+                font-size: 2.2rem;
+            }
+
+            .phase-item .name {
+                font-size: 0.7rem;
+            }
+
+            .projects-list {
+                grid-template-columns: 1fr;
+            }
+
+            .keyword-pills {
+                gap: 10px;
+            }
+
+            .keyword-pill {
+                padding: 12px 18px;
+            }
+
+            .keyword-pill .count {
+                font-size: 1.4rem;
+            }
+
+            .footer .cta {
+                font-size: 1.4rem;
+            }
+
+            .deco-rocket, .deco-bulb {
+                display: none;
+            }
+
+            .blob {
+                display: none;
+            }
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 15px;
+            }
+
+            .hero-banner {
+                height: 220px;
+            }
+
+            .hero-caption {
+                font-size: 0.8rem;
+                left: 15px;
+                bottom: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
+            .match-badge {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+
+            .header .date {
+                font-size: 0.85rem;
+                padding: 6px 16px;
+            }
+
+            .stat-card {
+                padding: 20px 25px;
+            }
+
+            .stat-card .number {
+                font-size: 3rem;
+            }
+
+            .stat-card .label {
+                font-size: 0.8rem;
+                letter-spacing: 1px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .card h2 {
+                font-size: 1.1rem;
+            }
+
+            .phase-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .phase-item {
+                padding: 15px 10px;
+            }
+
+            .phase-item .emoji {
+                font-size: 1.8rem;
+            }
+
+            .phase-item .count {
+                font-size: 1.8rem;
+            }
+
+            .phase-item .percent {
+                font-size: 0.85rem;
+            }
+
+            .phase-item .name {
+                font-size: 0.65rem;
+            }
+
+            .superpowers-cloud {
+                gap: 8px;
+            }
+
+            .superpower-tag {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+
+            .hot-skill {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .hot-skill .gap {
+                font-size: 0.8rem;
+            }
+
+            .project-item {
+                padding: 12px 15px;
+                font-size: 0.85rem;
+            }
+
+            .footer {
+                padding: 30px 20px;
+            }
+
+            .footer .cta {
+                font-size: 1.2rem;
+            }
+
+            .footer .details {
+                font-size: 0.95rem;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
+            .blocks-accent {
+                gap: 3px;
+            }
+
+            .block {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Colored blobs from event cover -->
+    <div class="blob blob-teal"></div>
+    <div class="blob blob-yellow"></div>
+    <div class="blob blob-blue"></div>
+
+    <div class="dashboard">
+        <div class="header">
+            <span class="deco-bulb">💡</span>
+            <span class="deco-rocket">🚀</span>
+            <h1><span class="makers">Makers</span><span class="lounge">Lounge</span> #6</h1>
+            <div class="subtitle">The Match Edition — Who's in the Room?</div>
+            <div class="match-badge">🤝 Find Your Skillmate Tonight</div>
+            <div class="date">Tuesday, December 16th @ New Stadium</div>
+            <div class="blocks-accent">
+                <div class="block"></div>
+                <div class="block"></div>
+                <div class="block"></div>
+                <div class="block"></div>
+                <div class="block"></div>
+            </div>
+        </div>
+
+        <div class="hero-banner">
+            <img src="hero.png" alt="MakersLounge community working together">
+            <div class="hero-caption">📸 MakersLounge Toronto — Where makers connect</div>
+        </div>
+
+        <div class="big-number">
+            <div class="stat-card">
+                <div class="number">123</div>
+                <div class="label">Makers Registered</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">344</div>
+                <div class="label">Skills Offered</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">277</div>
+                <div class="label">Skills Needed</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 40px;">
+            <span class="section-deco">⚙️</span>
+            <h2><span class="icon">🚀</span> Project Phases</h2>
+            <div class="phase-grid">
+                <div class="phase-item spark">
+                    <div class="emoji">💡</div>
+                    <div class="count">31</div>
+                    <div class="percent">25%</div>
+                    <div class="name">Spark (Ideation)</div>
+                </div>
+                <div class="phase-item build">
+                    <div class="emoji">🔨</div>
+                    <div class="count">60</div>
+                    <div class="percent">49%</div>
+                    <div class="name">Build (Building)</div>
+                </div>
+                <div class="phase-item momentum">
+                    <div class="emoji">📈</div>
+                    <div class="count">19</div>
+                    <div class="percent">15%</div>
+                    <div class="name">Momentum (Growing)</div>
+                </div>
+                <div class="phase-item maintenance">
+                    <div class="emoji">⚙️</div>
+                    <div class="count">9</div>
+                    <div class="percent">7%</div>
+                    <div class="name">Maintenance</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card skills-comparison" style="margin-bottom: 40px;">
+            <span class="section-deco">🤝</span>
+            <h2><span class="icon">🎯</span> Skills Supply vs Demand — Find Your Match!</h2>
+            <div class="chart-container">
+                <canvas id="skillsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2><span class="icon">🔥</span> High-Demand Skills</h2>
+                <p style="color: #888; margin-bottom: 20px; font-size: 0.95rem;">More people need these than offer them!</p>
+                <div class="hot-skill">
+                    <span class="name">Pitching & Fundraising</span>
+                    <span class="gap">34 need → 25 offer</span>
+                </div>
+                <div class="hot-skill">
+                    <span class="name">Legal</span>
+                    <span class="gap">8 need → 3 offer</span>
+                </div>
+                <div class="hot-skill">
+                    <span class="name">Mobile App Dev</span>
+                    <span class="gap">22 need → 20 offer</span>
+                </div>
+                <div class="hot-skill">
+                    <span class="name">Recruiting</span>
+                    <span class="gap">11 need → 10 offer</span>
+                </div>
+                <div class="hot-skill">
+                    <span class="name">Accounting/Finance</span>
+                    <span class="gap">10 need → 9 offer</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">🤖</span> What People Are Building</h2>
+                <p style="color: #888; margin-bottom: 20px; font-size: 0.95rem;">Project keyword mentions</p>
+                <div class="keyword-pills">
+                    <div class="keyword-pill">
+                        <span class="count">52</span>
+                        <span class="label">AI projects</span>
+                    </div>
+                    <div class="keyword-pill">
+                        <span class="count">18</span>
+                        <span class="label">Apps</span>
+                    </div>
+                    <div class="keyword-pill">
+                        <span class="count">7</span>
+                        <span class="label">Startups</span>
+                    </div>
+                    <div class="keyword-pill">
+                        <span class="count">5</span>
+                        <span class="label">E-commerce</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 40px;">
+            <span class="section-deco">⚙️</span>
+            <h2><span class="icon">🌟</span> Bonus Superpowers in the Room</h2>
+            <p style="color: #888; margin-bottom: 20px; font-size: 0.95rem;">59 people brought extra skills beyond the basics!</p>
+            <div class="superpowers-cloud">
+                <span class="superpower-tag highlight">Product Management</span>
+                <span class="superpower-tag">Business Development</span>
+                <span class="superpower-tag teal">Investment Banking</span>
+                <span class="superpower-tag">Shopify CRO</span>
+                <span class="superpower-tag">Marketing & GTM</span>
+                <span class="superpower-tag highlight">AI Research</span>
+                <span class="superpower-tag teal">Data Engineering</span>
+                <span class="superpower-tag">Architecture</span>
+                <span class="superpower-tag highlight">Storytelling</span>
+                <span class="superpower-tag">Content Strategy</span>
+                <span class="superpower-tag teal">Digital Illustration</span>
+                <span class="superpower-tag highlight">Model Training</span>
+                <span class="superpower-tag">Supply Chain</span>
+                <span class="superpower-tag teal">Accessibility & UX</span>
+                <span class="superpower-tag highlight">Speaks 4 Languages</span>
+                <span class="superpower-tag">Operations</span>
+                <span class="superpower-tag teal">Reality Distortion Field</span>
+                <span class="superpower-tag">Analytics</span>
+                <span class="superpower-tag teal">Guided Meditation</span>
+                <span class="superpower-tag highlight">Good Dancer</span>
+                <span class="superpower-tag">Coffee Chemistry</span>
+                <span class="superpower-tag teal">Systems Thinking</span>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 40px;">
+            <h2><span class="icon">💼</span> Sample Projects You'll Meet</h2>
+            <div class="projects-list">
+                <div class="project-item">AI body language sales coach</div>
+                <div class="project-item">Social calendar planning app</div>
+                <div class="project-item">Wearable promises (Promise Piece)</div>
+                <div class="project-item">AI property management</div>
+                <div class="project-item">Japanese ikebana floral business</div>
+                <div class="project-item">Co-housing in Toronto</div>
+                <div class="project-item">AI-enhanced multiplayer study app</div>
+                <div class="project-item">Constant-time RAGs (world's first!)</div>
+                <div class="project-item">Brand certification platform</div>
+                <div class="project-item">AI hacking agents</div>
+            </div>
+        </div>
+
+        <!-- Hand-drawn wave decoration -->
+        <div class="wave-decoration">
+            <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+                <path d="M0,30 Q50,10 100,30 T200,30 T300,30 T400,30 T500,30 T600,30 T700,30 T800,30 T900,30 T1000,30 T1100,30 T1200,30"
+                      fill="none" stroke="#FF8C00" stroke-width="3" stroke-linecap="round"/>
+                <path d="M0,45 Q50,25 100,45 T200,45 T300,45 T400,45 T500,45 T600,45 T700,45 T800,45 T900,45 T1000,45 T1100,45 T1200,45"
+                      fill="none" stroke="#4169E1" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+            </svg>
+        </div>
+
+        <div class="footer">
+            <div class="cta">See you tonight at 5:30pm! 🚀</div>
+            <div class="details">New Stadium — 83 Walnut Ave, Toronto</div>
+            <div class="hashtags">#MakersLounge #NewStadium</div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('skillsChart').getContext('2d');
+
+        const skills = [
+            'Design (UX/UI)',
+            'Web Dev',
+            'AI Automations',
+            'Sales',
+            'Community',
+            'Social Media',
+            'Event Planning',
+            'Pitching',
+            'Film/Photo',
+            'Mobile Dev',
+            'E-commerce',
+            'Recruiting'
+        ];
+
+        const offered = [44, 40, 39, 37, 32, 29, 29, 25, 22, 20, 17, 10];
+        const needed = [22, 32, 26, 33, 29, 29, 14, 34, 13, 22, 5, 11];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: skills,
+                datasets: [
+                    {
+                        label: 'People Offering',
+                        data: offered,
+                        backgroundColor: '#4169E1',
+                        borderColor: '#1a1a2e',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'People Needing',
+                        data: needed,
+                        backgroundColor: '#FF8C00',
+                        borderColor: '#1a1a2e',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#333',
+                            font: { size: 14, family: 'Space Grotesk', weight: '600' },
+                            padding: 25,
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#555',
+                            font: { size: 11, family: 'Space Grotesk', weight: '500' },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#555',
+                            font: { family: 'Space Grotesk' }
+                        },
+                        grid: { color: 'rgba(0,0,0,0.06)' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
