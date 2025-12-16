@@ -167,7 +167,7 @@ async def run_matching():
 
         # Round 1: Complementary
         update_progress(3, "AI Matching", "Round 1: Finding skill→need matches...", 30)
-        round1 = run_complementary_round(attendees, used_pairs, round_number=1)
+        round1 = run_complementary_round(1, attendees, used_pairs)
         all_rounds.append(round1)
         for m in round1["matches"]:
             pair = tuple(sorted([m["helper"]["name"], m["helped"]["name"]]))
@@ -175,7 +175,7 @@ async def run_matching():
 
         # Round 2: Complementary
         update_progress(3, "AI Matching", "Round 2: Finding more skill→need matches...", 45)
-        round2 = run_complementary_round(attendees, used_pairs, round_number=2)
+        round2 = run_complementary_round(2, attendees, used_pairs)
         all_rounds.append(round2)
         for m in round2["matches"]:
             pair = tuple(sorted([m["helper"]["name"], m["helped"]["name"]]))
@@ -183,7 +183,7 @@ async def run_matching():
 
         # Round 3: Similarity
         update_progress(3, "AI Matching", "Round 3: Finding similar project matches...", 60)
-        round3 = run_similarity_round(attendees, used_pairs, round_number=3)
+        round3 = run_similarity_round(3, attendees, used_pairs)
         all_rounds.append(round3)
         for m in round3["matches"]:
             pair = tuple(sorted([m["person_a"]["name"], m["person_b"]["name"]]))
@@ -191,7 +191,7 @@ async def run_matching():
 
         # Round 4: Similarity
         update_progress(3, "AI Matching", "Round 4: Finding more similar projects...", 75)
-        round4 = run_similarity_round(attendees, used_pairs, round_number=4)
+        round4 = run_similarity_round(4, attendees, used_pairs)
         all_rounds.append(round4)
 
         results = {
